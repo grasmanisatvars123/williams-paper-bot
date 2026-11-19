@@ -1,0 +1,33 @@
+{
+ "day": "2026-11-19",
+ "open_px": 737.54,
+ "prior_high": 735.06,
+ "prior_low": 726.795,
+ "up": 741.67,
+ "dn": 733.41,
+ "qty": 120,
+ "equity": 99218.73,
+ "mode": "watch",
+ "orders": {
+  "entry": "9e1e0f18-ae74-4807-9713-35b255621234"
+ },
+ "trade": {
+  "side": -1,
+  "entry": 733.24975,
+  "entry_time": "10:15",
+  "stop": 741.67,
+  "qty": 120,
+  "stop_order": "f2ef951a-5eed-4b89-8adb-1eabd1aa2383"
+ },
+ "notes": [
+  "09:54 Atlikusi poz\u012bcija no iepriek\u0161\u0113j\u0101s dienas aizv\u0113rta pie atv\u0113r\u0161anas.",
+  "09:54 L\u012bme\u0146i: pirkt virs 741.67, p\u0101rdot zem 733.41, 120 akcijas. Bots v\u0113ro cenu l\u012bdz 12:00.",
+  "10:15 Ieeja p\u0101rdot 120 pie 733.25 (l\u012bmenis 733.41).",
+  "10:15 Stops broker\u012b pie 741.67."
+ ],
+ "open_done": true,
+ "noon_done": false,
+ "close_done": false,
+ "done": false,
+ "close_time": "16:00"
+}

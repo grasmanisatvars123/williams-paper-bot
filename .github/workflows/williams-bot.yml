@@ -1,0 +1,119 @@
+# Williams paper bot (05 Bot/williams_bot.py) for SPY on an Alpaca PAPER account. No real money.
+# Public repository so GitHub Actions minutes are free; the keys are encrypted repository secrets.
+# Each start runs "auto", which does whatever phase is due and skips what is already done:
+#   open   13:40 UTC = 08:40 New York (+ backups 14:05, 14:20, 14:28): waits for 09:31, watches the price until 12:00
+#   noon   16:57 UTC = 11:57 New York (+ backup 17:20): checks the stop
+#   close  19:00 UTC = 14:00 New York (+ backups 19:25, 19:50, 20:20): keeps the stop until 15:58, then closes
+# GitHub often starts scheduled runs 45-75 minutes late, hence the early and repeated starts.
+# Times are for US winter time. From 14 March 2027 every cron must move one hour earlier.
+# Messages for the phone are written to 05 Bot/outbox/; the owner's private repository sends them.
+name: Williams paper bot
+
+on:
+  schedule:
+    - cron: "40 13 * * 1-5"
+    - cron: "5 14 * * 1-5"
+    - cron: "20 14 * * 1-5"
+    - cron: "28 14 * * 1-5"
+    - cron: "57 16 * * 1-5"
+    - cron: "20 17 * * 1-5"
+    - cron: "0 19 * * 1-5"
+    - cron: "25 19 * * 1-5"
+    - cron: "50 19 * * 1-5"
+    - cron: "20 20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto = the phase due now, scan = today's levels only, status = account, position and orders (read only)"
+        default: status
+        type: choice
+        options: [status, scan, auto]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: williams           # one run at a time on the paper account
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Is there anything to do?
+        id: pre
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os, datetime, zoneinfo
+          day = datetime.datetime.now(zoneinfo.ZoneInfo("America/New_York")).date().isoformat()
+          mode = os.environ.get("MODE") or "auto"
+          if mode == "auto":
+              p = f"05 Bot/state_williams/{day}.json"
+              # this repository takes over from the private one on 2026-11-20
+              if day < "2026-11-20" or (os.path.exists(p) and json.load(open(p)).get("done") is True):
+                  mode = "none"
+          print(f"mode={mode}")
+          print(f"day={day}")
+          EOF
+
+      - uses: actions/setup-python@v5
+        if: steps.pre.outputs.mode != 'none'
+        with:
+          python-version: "3.13"
+
+      - name: Install packages
+        if: steps.pre.outputs.mode != 'none'
+        run: pip install numpy pandas truststore tzdata
+
+      - name: Run the bot
+        if: steps.pre.outputs.mode != 'none'
+        working-directory: "05 Bot"
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_BASE_URL: https://paper-api.alpaca.markets
+          MSG_FILE: ${{ runner.temp }}/msg.txt
+        run: python williams_bot.py ${{ steps.pre.outputs.mode }}
+
+      - name: Queue the message for the phone
+        if: always() && steps.pre.outputs.mode == 'auto'
+        env:
+          JOB_STATUS: ${{ job.status }}
+          MSG_FILE: ${{ runner.temp }}/msg.txt
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'EOF'
+          import datetime, os
+          if os.environ["JOB_STATUS"] != "success":
+              text = "Williams papīra bots: palaišana NEIZDEVĀS. " + os.environ["RUN_URL"]
+          elif os.path.exists(os.environ["MSG_FILE"]):
+              text = open(os.environ["MSG_FILE"], encoding="utf-8").read()
+          else:
+              raise SystemExit(0)
+          stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H%M%S")
+          os.makedirs("05 Bot/outbox", exist_ok=True)
+          open(f"05 Bot/outbox/{stamp}-{os.environ['RUN_ID']}.txt", "w", encoding="utf-8").write(text)
+          EOF
+
+      - name: Save journal, state and message to the repo
+        if: always() && steps.pre.outputs.mode == 'auto'
+        run: |
+          git config user.name "paper-bot"
+          git config user.email "paper-bot@users.noreply.github.com"
+          git add "04 Trade Journal" "05 Bot/state_williams" "05 Bot/outbox" || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Williams paper bot: $(date -u +%F)"
+          for i in 1 2 3; do
+            if ! git pull --rebase; then git rebase --abort; git pull --rebase -X theirs || { git rebase --abort; sleep 5; continue; }; fi
+            git push && exit 0
+            sleep 5
+          done
+          exit 1

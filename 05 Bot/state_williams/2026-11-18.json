@@ -1,0 +1,39 @@
+{
+ "day": "2026-11-18",
+ "open_px": 733.415,
+ "prior_high": 739.76,
+ "prior_low": 727.0,
+ "up": 739.8,
+ "dn": 727.04,
+ "qty": 78,
+ "equity": 100000.21,
+ "mode": "watch",
+ "orders": {},
+ "trade": {
+  "side": -1,
+  "entry": 727.031539,
+  "entry_time": "11:20",
+  "stop": 739.8,
+  "qty": 78,
+  "stop_order": "56ff30ee-4e0b-408b-9415-a113eb8db4f2",
+  "exit": 737.012565,
+  "exit_time": "09:54",
+  "how": "aizv\u0113rts 2026-11-19 atv\u0113r\u0161an\u0101 (sl\u0113g\u0161anas palai\u0161ana nokav\u0113ja)",
+  "pnl": -778.5200280000033,
+  "R": -0.7816937374050045
+ },
+ "notes": [
+  "09:31 Alpaca nepie\u0146\u0113ma abus orderus (POST https://paper-api.alpaca.markets/v2/orders: HTTP 403 {\"code\":40310000,\"existing_order_id\":\"b70cab94-c818-42f5-94c1-). Bots pats v\u0113ro cenu l\u012bdz 12:00.",
+  "11:26 Broker\u012b atrasta poz\u012bcija (p\u0101rdots 78 pie 727.03), pievienota \u0161odienas dar\u012bjumam.",
+  "11:26 Stops broker\u012b pie 739.80.",
+  "16:12 Bots palaists p\u0113c sl\u0113guma: poz\u012bcija paliek l\u012bdz r\u012btdienas atv\u0113r\u0161anai.",
+  "16:30 Bots palaists p\u0113c sl\u0113guma: poz\u012bcija paliek l\u012bdz r\u012btdienas atv\u0113r\u0161anai.",
+  "16:39 Bots palaists p\u0113c sl\u0113guma: poz\u012bcija paliek l\u012bdz r\u012btdienas atv\u0113r\u0161anai.",
+  "2026-11-19 09:54 Poz\u012bcija aizv\u0113rta n\u0101kam\u0101s dienas atv\u0113r\u0161an\u0101 pie 737.01 (sl\u0113g\u0161anas palai\u0161anas s\u0101k\u0101s p\u0113c 16:00)."
+ ],
+ "open_done": true,
+ "noon_done": true,
+ "close_done": true,
+ "done": true,
+ "close_time": "16:00"
+}
