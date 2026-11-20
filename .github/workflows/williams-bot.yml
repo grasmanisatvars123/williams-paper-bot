@@ -93,7 +93,8 @@ jobs:
           python - <<'EOF'
           import datetime, os
           if os.environ["JOB_STATUS"] != "success":
-              text = "Williams papīra bots: palaišana NEIZDEVĀS. " + os.environ["RUN_URL"]
+              text = ("Williams bots: šodien radās tehniska kļūda, bots varēja neizpildīt savu darbu. "
+                      "Tev nekas nav jādara, pasaki Claude, lai paskatās. " + os.environ["RUN_URL"])
           elif os.path.exists(os.environ["MSG_FILE"]):
               text = open(os.environ["MSG_FILE"], encoding="utf-8").read()
           else:

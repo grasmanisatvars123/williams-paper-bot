@@ -113,18 +113,39 @@ def journal(s):
         f.write("\n".join(out))
 
 
+def lv_time(day, hhmm):
+    """New York HH:MM on that day as Latvian time."""
+    return pd.Timestamp(f"{day} {hhmm}", tz=NY).tz_convert("Europe/Riga").strftime("%H:%M")
+
+
+def usd(x):
+    return f"{abs(x):,.0f}".replace(",", " ") + " $"
+
+
 def message(s):
-    """One line for the phone (written to $MSG_FILE; the workflow sends it)."""
+    """A short plain-language message for the phone (written to $MSG_FILE; sent via WhatsApp).
+    Nothing is sent while the bot is only waiting for a level."""
     t, d = s["trade"], s["day"]
+    head = f"Williams bots, {pd.Timestamp(d):%d.%m.} (mācību konts, nav īsta nauda):"
     if t and t.get("exit"):
-        txt = (f"Williams papīrs {d}: {'pirkt' if t['side'] == 1 else 'pārdot'} {t['entry']:.2f} -> {t['exit']:.2f} "
-               f"({t['how']}), {t['R']:+.2f}R, {t['pnl']:+.0f} $")
+        eq = float(s["equity"] or 0) + t["pnl"]
+        bought = t["side"] == 1
+        txt = (f"{head} šodien {'NOPELNĪJA' if t['pnl'] >= 0 else 'ZAUDĒJA'} {usd(t['pnl'])}. "
+               f"Tas {'nopirka' if bought else 'pārdeva'} SPY par {t['entry']:.2f} un "
+               f"{'pārdeva' if bought else 'atpirka'} par {t['exit']:.2f}. Kontā tagad ap {usd(eq)}.")
     elif t:
-        txt = f"Williams papīrs {d}: {'pirkt' if t['side'] == 1 else 'pārdot'} {t['entry']:.2f}, stops {t['stop']:.2f}, atvērts"
+        what = "NOPIRKA SPY (gaida, ka cena celsies)" if t["side"] == 1 else "PĀRDEVA SPY (gaida, ka cena kritīsies)"
+        risk = abs(t["entry"] - t["stop"]) * t["qty"]
+        txt = (f"{head} {what} par {t['entry']:.2f}. Ja cena aizies līdz {t['stop']:.2f}, bots izies ar zaudējumu "
+               f"ap {usd(risk)}. Citādi tas aizvērs darījumu {lv_time(d, '15:58')} pēc Latvijas laika un atsūtīs rezultātu.")
+    elif s["up"] and s["noon_done"]:
+        txt = (f"{head} šodien darījuma nebija. Cena neaizgāja ne līdz {s['up']:.2f} (pirkšanai), "
+               f"ne līdz {s['dn']:.2f} (pārdošanai). Nauda kontā nemainījās.")
     elif s["up"]:
-        txt = f"Williams papīrs {d}: pirkt virs {s['up']:.2f}, pārdot zem {s['dn']:.2f}" + ("; darījuma nebija" if s["noon_done"] else "")
+        return
     else:
-        txt = f"Williams papīrs {d}: " + (s["notes"][-1] if s["notes"] else "nav datu")
+        why = s["notes"][-1].split(" ", 1)[-1] if s["notes"] else ""
+        txt = f"{head} šodien darījuma nebija. {why}".strip()
     if os.environ.get("MSG_FILE"):
         open(os.environ["MSG_FILE"], "w", encoding="utf-8").write(txt)
     print(txt)
