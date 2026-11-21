@@ -25,8 +25,9 @@ from alpaca import Alpaca, ApiError
 NY = "America/New_York"
 SYMBOL = "SPY"
 START = "2026-11-18"          # moved up from 2026-11-23 at the user's request; the TJR test ended 2026-11-17
-RISK_PCT = 0.01               # 1 % of equity between entry and stop (the user's paper rule)
-MAX_NOTIONAL = 1.5            # position value at most 1.5 x equity
+RISK_PCT = 0.10               # 10 % of equity between entry and stop (the user's choice on 2026-11-21, paper only)
+MAX_NOTIONAL = 4.0            # position value at most 4 x equity (Alpaca's day-trading limit); in practice this
+                              # cap decides the size almost every day (see 03 Strategies/Drawdown Study 2026-11-21.md)
 MIN_RISK = 0.10               # $ per share; 1 index point
 ENTRY_END = "12:00"
 POLL = 10
@@ -209,7 +210,9 @@ def phase_open(api, s):
     up, dn = px(o + rg / 2), px(o - rg / 2)
     acct = api.account()
     eq = float(acct["equity"])
-    qty = int(min(RISK_PCT * eq / max(up - dn, 1e-9), MAX_NOTIONAL * eq / o))
+    bp = float(acct.get("daytrading_buying_power") or 0)    # Alpaca refuses orders above this
+    cap = min(MAX_NOTIONAL * eq, 0.95 * bp) if bp > 0 else MAX_NOTIONAL * eq
+    qty = int(min(RISK_PCT * eq / max(up - dn, 1e-9), cap / max(up, o)))
     s.update(open_px=o, prior_high=hi, prior_low=lo, up=up, dn=dn, qty=qty, equity=eq)
     if up - dn < MIN_RISK or qty < 1:
         note(s, f"Diapazons pārāk mazs ({up - dn:.2f} $), darījuma nebūs.")

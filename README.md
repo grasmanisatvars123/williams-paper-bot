@@ -7,7 +7,7 @@ It runs on GitHub Actions; this repository is public only so the Actions minutes
 - levels = today's 09:30 New York open ± 0.5 × yesterday's 09:30–16:00 range
 - the first level reached before 12:00 is the entry (up = buy, down = sell), one trade a day
 - the other level is the stop; no target; out at 15:58
-- size: 1 % of equity between entry and stop, position at most 1.5 × equity
+- size: 10 % of equity between entry and stop (since 2026-11-21), position at most 4 × equity and 95 % of the day-trading buying power; the 4 × cap decides the size on almost every day
 
 Alpaca refuses a buy stop and a sell stop on the same symbol at once, so the bot watches the price from 09:31 to
 12:00, enters at market and then places the stop. Every run first checks the account and makes sure any SPY
