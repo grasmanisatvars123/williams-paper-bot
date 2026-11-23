@@ -1,0 +1,21 @@
+{
+ "day": "2026-11-23",
+ "open_px": 724.295,
+ "prior_high": 718.29,
+ "prior_low": 686.75,
+ "up": 740.07,
+ "dn": 708.53,
+ "qty": 320,
+ "equity": 101241.49,
+ "mode": "watch",
+ "orders": {},
+ "trade": null,
+ "notes": [
+  "09:42 L\u012bme\u0146i: pirkt virs 740.07, p\u0101rdot zem 708.53, 320 akcijas. Bots v\u0113ro cenu l\u012bdz 12:00."
+ ],
+ "open_done": true,
+ "noon_done": true,
+ "close_done": false,
+ "done": false,
+ "close_time": "16:00"
+}
