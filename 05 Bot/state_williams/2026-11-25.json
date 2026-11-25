@@ -1,0 +1,21 @@
+{
+ "day": "2026-11-25",
+ "open_px": 703.155,
+ "prior_high": 720.93,
+ "prior_low": 712.14,
+ "up": 707.55,
+ "dn": 698.76,
+ "qty": 572,
+ "equity": 101241.49,
+ "mode": "orders",
+ "orders": {},
+ "trade": null,
+ "notes": [
+  "09:45 Bots s\u0101ka 09:45, un cena jau bija aizsniegusi l\u012bmeni. \u0160odien izlaists."
+ ],
+ "open_done": true,
+ "noon_done": false,
+ "close_done": false,
+ "done": false,
+ "close_time": "16:00"
+}
