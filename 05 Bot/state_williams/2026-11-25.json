@@ -15,7 +15,7 @@
  ],
  "open_done": true,
  "noon_done": true,
- "close_done": false,
- "done": false,
+ "close_done": true,
+ "done": true,
  "close_time": "16:00"
 }
